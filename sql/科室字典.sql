@@ -1,0 +1,1 @@
+select dept_code, dept_name from department_dict

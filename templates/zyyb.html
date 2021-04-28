@@ -1,0 +1,440 @@
+{% extends "home.html" %}
+
+{% block page-main %}
+    {#时间选择#}
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+        <legend>住院药比</legend>
+    </fieldset>
+
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-row layui-col-space10">
+                <label class="layui-form-label">日期范围</label>
+                <div class="layui-input-inline layui-col-md4">
+                    <input type="text" class="layui-input" id="time1" placeholder="请选择起始日期">
+                </div>
+
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block layui-row">
+                        <div class="layui-col-md4">
+                            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                                    id="query-button">立即提交
+                            </button>
+                            <button type="reset"
+                                    class="layui-btn layui-btn-primary"
+                                    id="resetcode">重置
+                            </button>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="layui-form">
+        <div class="layui-col-md4 layui-row">
+
+            <label class="layui-form-label">收件邮箱:</label>
+            <div class="layui-input-inline" style="display: flex;flex-direction: row;">
+                <input type="text" name="email" lay-verify="email" autocomplete="off"
+                       class="layui-input" style="width:180px;" id="emailaddr">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                        id="send-button">立即发送
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!--数据显示表格-->
+    <div class="layui-row">
+        <table class="layui-hide" id="table1" lay-filter="table1"></table>
+    </div>
+
+    {#    <script src="/static/layui/layui.js"></script>#}
+    {#    <script src="/static/jquery-3.3.1.js"></script>#}
+    <script>
+        var tabledata = '';
+        // 设置文件flag 有文件时，才能点击发送邮件
+        var havefile = 0;
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+
+//执行一个laydate实例
+
+//日期范围
+            laydate.render({
+                elem: '#time1',
+                min: '2021-01-01'
+                , range: true
+            });
+            console.log(laydate);
+//年范围
+            laydate.render({
+                elem: '#test7'
+                , type: 'year'
+                , range: true
+            });
+        });
+
+        // 查询数据
+        $("#query-button").click(function () {
+            // 1.获取起始时间
+            var time = $("#time1").val();
+
+            console.log(time);
+            if (time === "") {
+                // 如果输入信息为空 弹窗提示
+                layui.use('layer', function () {
+                    var layer = layui.layer;
+                    layer.alert('请选择日期');
+                });
+            } else {
+                $.ajax({
+                        url: "/zyyb/",
+                        type: "post",
+                        data: {
+                            "time": time
+                        },
+                        success: function (data) {
+                            if (data.status === 0) {
+                                layui.use('layer', function () {
+                                    var layer = layui.layer;
+                                    layer.alert('检索失败！\n请重新输入药品代码、选择时间。');
+                                });
+                            } else {
+                                tabledata = data.data;
+                                console.log(typeof(data));
+                                console.log(tabledata);
+                                console.log(data.status);
+                                havefile = data.status;
+                                layui.use('table', function () {
+                                    var table = layui.table;
+//展示已知数据
+                                    table.render({
+                                        elem: '#table1'
+                                        , url: ''
+                                        , data: tabledata
+                                        , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+                                        , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                                            title: '提示'
+                                            , layEvent: 'LAYTABLE_TIPS'
+                                            , icon: 'layui-icon-tips'
+                                        }]
+                                        , title: '住院药比:'+time
+                                        , cols: [[
+                                            {field: 'dept_name', title: '科室名称',   totalRowText: '合计行'}
+                                            , {field: 'total_cost', title: '总费用',  sort: true, totalRow: true}
+                                            , {field: 'xy', title: '西药', sort: true, totalRow: true}
+                                            , {field: 'zcy', title: '中成药', sort: true, totalRow: true}
+                                            , {field: 'ptzj', title: '普通制剂', sort: true, totalRow: true}
+                                            , {field: 'gf', title: '膏方',  sort: true, totalRow: true}
+                                            , {field: 'ctyp', title: '传统饮片',  sort: true, totalRow: true}
+                                            , {field: 'jzyp', title: '精制饮片', sort: true, totalRow: true}
+                                            , {field: 'cw', title: '超微',  sort: true, totalRow: true}
+{#                                            , {field: 'krt', title: '康仁堂', sort: true, totalRow: true}#}
+{#                                            , {field: 'xl', title: '新绿',  sort: true, totalRow: true}#}
+{#                                            , {field: 'sj', title: '三九',  sort: true, totalRow: true}#}
+                                            , {field: 'otherDrug', title: '其他药品',  sort: true, totalRow: true}
+
+                                        ]]
+                                        , page: true
+                                        , totalRow: true
+                                        , limit:50
+                                    });
+
+                                })
+                            }
+
+                        }
+                    }
+                )
+            }
+        });
+
+        // 发送邮件到指定邮箱
+        $("#send-button").click(function () {
+            if (havefile === 0) {
+                layui.use('layer', function () {
+                    var layer = layui.layer;
+                    layer.alert('没有要发送的结果，请先查询数据');
+                });
+            } else {
+                var emailaddr = $("#emailaddr").val();
+                var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$"); //正则表达式
+                var obj = document.getElementById("emailaddr"); //要验证的对象
+                if (obj.value === "") { //输入不能为空
+                    layui.use('layer', function () {
+                        var layer = layui.layer;
+                        layer.alert('请填写邮箱');
+                    });
+                } else if (!reg.test(obj.value)) { //正则验证不通过，格式不对
+                    layui.use('layer', function () {
+                        var layer = layui.layer;
+                        layer.alert('邮箱格式不正确');
+                    });
+                } else {
+                    $.ajax({
+                        url: "/sendemail/",
+                        type: "post",
+                        data: {
+                            "emailaddr": emailaddr
+                        },
+                        success: function (data) {
+                            console.log(data);
+                            if (data.status === 1) {
+                                layui.use('layer', function () {
+                                    var layer = layui.layer;
+                                    layer.alert('邮件发送成功! 请注意查收');
+                                });
+                            } else if (data.status === 0) {
+                                layui.use('layer', function () {
+                                    var layer = layui.layer;
+                                    layer.alert('邮件发送失败');
+                                });
+                            }
+                        }
+                    })
+                }
+            }
+
+        });
+
+        // 重置代码输入框
+        $("#resetcode").click(function () {
+            $("#time1").val("")
+
+        });
+
+
+    </script>
+{% endblock %}
+
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>药品销量查询</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" media="all">
+</head>
+<body>
+
+时间选择
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+    <legend>指定时间指定药品全院销量查询</legend>
+</fieldset>
+
+<div class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-row layui-col-space10">
+            <label class="layui-form-label">日期范围</label>
+            <div class="layui-input-inline layui-col-md4">
+                <input type="text" class="layui-input" id="time1" placeholder="请选择起始日期">
+            </div>
+            <div>
+                <button type="button" class="layui-btn layui-btn-radius" id="query-button">查询</button>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">药品代码</label>
+
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入药品代码(如有多个，请通过空格分开)" class="layui-textarea" id="textcode"
+                              style="width:800px;"></textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block layui-row">
+                    <div class="layui-col-md4">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                                id="query-button">立即提交
+                        </button>
+                        <button type="reset"
+                                class="layui-btn layui-btn-primary"
+                                id="resetcode">重置
+                        </button>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+<div class="layui-form">
+    <div class="layui-col-md4 layui-row">
+
+        <label class="layui-form-label">收件邮箱:</label>
+        <div class="layui-input-inline" style="display: flex;flex-direction: row;">
+            <input type="text" name="email" lay-verify="email" autocomplete="off"
+                   class="layui-input" style="width:180px;" id="emailaddr">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                    id="send-button">立即发送
+            </button>
+
+        </div>
+    </div>
+</div>
+
+数据显示表格
+<div class="layui-row">
+    <table class="layui-hide" id="table1" lay-filter="table1"></table>
+</div>
+
+<script src="/static/layui/layui.js"></script>
+<script src="/static/jquery-3.3.1.js"></script>
+<script>
+    var tabledata = '';
+    // 设置文件flag 有文件时，才能点击发送邮件
+    var havefile = 0
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+
+//执行一个laydate实例
+
+//日期范围
+        laydate.render({
+            elem: '#time1',
+            min: '2020-06-30'
+            , range: true
+        });
+        console.log(laydate)
+    });
+
+    // 查询数据
+    $("#query-button").click(function () {
+// 1.获取起始时间
+        var time = $("#time1").val();
+        var textcode = $("#textcode").val();
+        console.log(time);
+        if (time === "" || textcode === "") {
+// 如果输入信息为空 弹窗提示
+            layui.use('layer', function () {
+                var layer = layui.layer;
+                layer.alert('请选择日期，并且输入至少一个药品代码！\n请注意多个药品代码之间请用空格分隔');
+            });
+        } else {
+            $.ajax({
+                    url: "/query/",
+                    type: "post",
+                    data: {
+                        "time": time,
+                        "textcode": textcode
+                    },
+                    success: function (data) {
+                        if (data.status === 0) {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.alert('检索失败！\n请重新输入药品代码、选择时间。');
+                            });
+                        } else {
+                            tabledata = data.data;
+                            console.log(typeof(data));
+                            console.log(tabledata);
+                            console.log(data.status);
+                            havefile = data.status;
+                            layui.use('table', function () {
+                                var table = layui.table;
+//展示已知数据
+                                table.render({
+                                    elem: '#table1'
+                                    , url: ''
+                                    , data: tabledata
+                                    , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+                                    , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                                        title: '提示'
+                                        , layEvent: 'LAYTABLE_TIPS'
+                                        , icon: 'layui-icon-tips'
+                                    }]
+                                    , title: '用户数据表'
+                                    , cols: [[
+                                        {field: '药品代码', title: '药品代码', width: 120, edit: 'text', totalRowText: '合计行'}
+                                        , {field: '药品名称', title: '药品名称', width: 150, edit: 'text'}
+                                        , {field: '数量', title: '数量', width: 100, sort: true, totalRow: true}
+                                        , {field: '单价', title: '单价', width: 80, edit: 'text', sort: true}
+                                        , {field: '总金额', title: '总金额', width: 120, edit: 'text', sort: true, totalRow: true}
+                                    ]]
+                                    , page: true
+                                    , totalRow: true
+                                });
+
+                            })
+                        }
+
+                    }
+                }
+            )
+        }
+    });
+
+    // 发送邮件到指定邮箱
+    $("#send-button").click(function () {
+        if (havefile === 0) {
+            layui.use('layer', function () {
+                var layer = layui.layer;
+                layer.alert('没有要发送的结果，请先查询数据');
+            });
+        } else {
+            var emailaddr = $("#emailaddr").val();
+            var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$"); //正则表达式
+            var obj = document.getElementById("emailaddr"); //要验证的对象
+            if (obj.value === "") { //输入不能为空
+                layui.use('layer', function () {
+                    var layer = layui.layer;
+                    layer.alert('请填写邮箱');
+                });
+            } else if (!reg.test(obj.value)) { //正则验证不通过，格式不对
+                layui.use('layer', function () {
+                    var layer = layui.layer;
+                    layer.alert('邮箱格式不正确');
+                });
+            } else {
+                $.ajax({
+                    url: "/sendemail/",
+                    type: "post",
+                    data: {
+                        "emailaddr": emailaddr
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data.status === 1) {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.alert('邮件发送成功! 请注意查收');
+                            });
+                        } else if (data.status === 0) {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.alert('邮件发送失败');
+                            });
+                        }
+                    }
+                })
+            }
+        }
+
+    });
+
+    // 重置代码输入框
+    $("#resetcode").click(function () {
+        $("#textcode").val("")
+
+    })
+
+
+</script>
+</body>
+</html>
+
+-->
