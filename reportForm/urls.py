@@ -24,12 +24,12 @@ urlpatterns = [
 
 
 # 创建定时任务
-from apscheduler.scheduler import Scheduler
-from index.views import getdataeveryday
-
-sched = Scheduler()
-
-@sched.interval_schedule(seconds=3)
-def mytask():
-    getdataeveryday()
-sched.start()
+# from apscheduler.scheduler import Scheduler
+# from index.views import getdataeveryday
+#
+# sched = Scheduler()
+#
+# @sched.interval_schedule(seconds=3000000)
+# def mytask():
+#     getdataeveryday()
+# sched.start()

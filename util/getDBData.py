@@ -30,7 +30,7 @@ def getData(sqlfile, DBtype, startdate, enddate):
         sqltxt = f.readlines()
         sql = "".join(sqltxt)
         sql = sql.format(startdate=startdate, enddate=enddate)
-        # print(sql)
+        print(sql)
 
     df = pd.read_sql(sql, engine)
     # print(df.head())

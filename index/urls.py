@@ -14,7 +14,10 @@ urlpatterns = [
     url('^$', views.home, name='home'),  # 首页路由
     url('home', views.home, name='home'),  # 首页路由
     url('zyyb', views.zyyb, name='zyyb'), # 住院药比
-    url('mzyb', views.mzyb, name='mzyb') # 门诊药比
-    url('getData', views.getData, name='getData')  # 获取数据并保存到mysql中
+    url('mzyb', views.mzyb, name='mzyb'), # 门诊药比
+
+
+    # 获取数据
+    url('getZyybData', views.getZyybData, name='getZyybData')  # 获取数据并保存到mysql中
 
 ]
