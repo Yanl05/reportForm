@@ -3,7 +3,7 @@
 {% block page-main %}
     {#时间选择#}
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
-        <legend>住院药比</legend>
+        <legend>住院药比(比例)</legend>
     </fieldset>
 
     <div class="layui-form">
@@ -97,7 +97,7 @@
                 });
             } else {
                 $.ajax({
-                        url: "zyyb",
+                        url: "zyybbl",
                         type: "post",
                         data: {
                             "time": time
@@ -131,17 +131,17 @@
                                         , cols: [[
                                             {field: 'dept_name', title: '科室名称',   totalRowText: '合计行'}
                                             , {field: 'total_cost', title: '总费用',  sort: true, totalRow: true}
-                                            , {field: 'xy', title: '西药', sort: true, totalRow: true}
-                                            , {field: 'zcy', title: '中成药', sort: true, totalRow: true}
-                                            , {field: 'ptzj', title: '普通制剂', sort: true, totalRow: true}
+                                            , {field: 'xy', title: '西药比', sort: true}
+                                            , {field: 'zcy', title: '中成药比', sort: true}
+                                            , {field: 'ptzj', title: '普通制剂比', sort: true}
                                             {#, {field: 'gf', title: '膏方',  sort: true, totalRow: true}#}
-                                            , {field: 'ctyp', title: '传统饮片',  sort: true, totalRow: true}
-                                            , {field: 'jzyp', title: '精制饮片', sort: true, totalRow: true}
-                                            , {field: 'cw', title: '超微',  sort: true, totalRow: true}
+                                            , {field: 'ctyp', title: '传统饮片比',  sort: true}
+                                            , {field: 'jzyp', title: '精制饮片比', sort: true}
+                                            , {field: 'cw', title: '超微比',  sort: true}
 {#                                            , {field: 'krt', title: '康仁堂', sort: true, totalRow: true}#}
 {#                                            , {field: 'xl', title: '新绿',  sort: true, totalRow: true}#}
 {#                                            , {field: 'sj', title: '三九',  sort: true, totalRow: true}#}
-                                            , {field: 'otherDrug', title: '其他药品',  sort: true, totalRow: true}
+                                            , {field: 'otherDrug', title: '其他药品比',  sort: true}
 
                                         ]]
                                         , page: true

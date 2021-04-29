@@ -13,7 +13,13 @@ app_name = 'index'
 urlpatterns = [
     url('^$', views.home, name='home'),  # 首页路由
     url('home', views.home, name='home'),  # 首页路由
-    url('zyyb', views.zyyb, name='zyyb'), # 住院药比
+
+    url('^yyrb$', views.yyrb, name='yyrb'),  # 医院日报
+    url('^mzybbl$', views.mzybbl, name='mzybbl'),  # 门诊药比 比例
+    url('^mzyb$', views.mzyb, name='mzyb'),  # 门诊药比
+
+    url('^zyyb$', views.zyyb, name='zyyb'), # 住院药比
+    url('^zyybbl$', views.zyybbl, name='zyybbl'), # 住院药比
     url('mzyb', views.mzyb, name='mzyb'), # 门诊药比
 
 

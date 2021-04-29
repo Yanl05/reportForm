@@ -11,6 +11,16 @@ from util.getDBData import getData2,getData,toMysql
 def home(request):
     return render(request, 'home.html')
 
+def yyrb(request):
+    if request.method == 'GET':
+        return render(request, 'yyrb.html')
+    else:
+        dataset = 111
+        return HttpResponse(dataset, content_type="application/json")
+
+def mzybbl(request):
+    pass
+
 
 def zyyb(request):
     if request.method == 'GET':
@@ -18,7 +28,30 @@ def zyyb(request):
     elif request.method == 'POST':
         starttime = request.POST.get("time")[:10]
         endtime = request.POST.get("time")[13:]
-        sqlfile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'sql\住院药比金额mysql.sql')
+        # windows下路径
+        # sqlfile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'sql\住院药比金额mysql.sql')
+        # mac环境下路径
+        sqlfile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'sql/住院药比金额mysql.sql')
+        # print(sqlfile)
+        df = getDBData.getData(sqlfile, 'mysql', starttime, endtime)
+        dataset = df.to_json(orient="table", force_ascii=False)
+        datadict = json.loads(dataset)
+        # 添加状态信息，状态为1 为检索成功。状态为0 为检索失败
+        datadict["status"] = 1
+        dataset = json.dumps(datadict)
+        print("sql查询成功！！！！！！！！！")
+        return HttpResponse(dataset, content_type="application/json")
+
+def zyybbl(request):
+    if request.method == 'GET':
+        return render(request, 'zyybbl.html')
+    elif request.method == 'POST':
+        starttime = request.POST.get("time")[:10]
+        endtime = request.POST.get("time")[13:]
+        # windows下路径
+        # sqlfile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'sql\住院药比金额mysql.sql')
+        # mac环境下路径
+        sqlfile = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'sql/住院药比比例mysql.sql')
         # print(sqlfile)
         df = getDBData.getData(sqlfile, 'mysql', starttime, endtime)
         dataset = df.to_json(orient="table", force_ascii=False)
